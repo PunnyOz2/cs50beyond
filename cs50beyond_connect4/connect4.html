@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 4</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        table {
+            width: 80vmin;
+            height: 80vmin;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        svg {
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" />
+    <script type="text/babel">
+
+        class App extends React.Component {
+
+            constructor(props) {
+                super(props);
+                this.state = {
+                    player_red: true,
+                    board: [[null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null]],
+                    colcount: [0, 0, 0, 0, 0, 0, 0],
+                    colnow: null,
+                    finish: null
+                }
+            }
+            render() {
+                return (
+                    <div>
+                        <h1>Connect 4</h1>
+                        {this.state.finish == 1 &&
+                            <h3>Winner: {this.state.player_red ? "Red" : "Black"}!</h3>
+                        }
+                        {this.state.finish == 0 &&
+                            <h3>Draw!</h3>
+                        }
+                        {this.state.finish == null &&
+                            <h3>Turn: {this.state.player_red ? "Red" : "Black"}</h3>
+                        }
+                        <table>
+                            <tbody>
+                                {this.state.board.map((row, i) => {
+                                    return (
+                                        <tr key={i}>
+                                            {row.map((col, j) => {
+                                                return (
+                                                    <td data-row={i} data-col={j} onClick={this.play} onMouseEnter={this.colHover} onMouseLeave={this.colLeave} key={j} style={{ backgroundColor: this.state.colnow == j ? "rgb(206, 206, 206)" : "white" }}>
+                                                        <svg>
+                                                            <circle cx="40" cy="40" r="35" style={{ fill: this.state.board[i][j] == 1 ? "red" : this.state.board[i][j] == 0 ? "black" : "white" }} />
+                                                        </svg>
+                                                    </td>
+                                                )
+                                            })}
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+            }
+            colHover = (event) => {
+                this.setState({
+                    colnow: event.target.dataset.col
+                })
+            }
+            colLeave = () => {
+                this.setState({
+                    colnow: null
+                })
+            }
+            play = (event) => {
+                if(this.state.finish !== null) return;
+                var i = parseInt(event.target.dataset.row);
+                var j = parseInt(event.target.dataset.col);
+                this.setState(state => {
+                    var counow = state.colcount;
+                    if (counow[j] >= 7) return;
+                    var winch = this.win(6-counow[j],j);
+                    var temp = state.board;
+                    temp[6-counow[j]][j] = state.player_red;
+                    counow[j]++;
+                    console.table(temp);
+                    if(winch == 1){
+                        return {
+                            finish: 1,
+                            colcount: counow,
+                            board: temp,
+                        }
+                    }
+                    if(winch == 0){
+                        return {
+                            finish: 0,
+                            colcount: counow,
+                            board: temp,
+                        }
+                    }
+                    return {
+                        colcount: counow,
+                        board: temp,
+                        player_red: !state.player_red
+                    }
+                })
+            }
+            win = (i,j) => {
+                const di = [-1,-1,-1,0];
+                const dj = [-1,0,1,-1];
+                for(let k = 0; k < 4; k++){
+                    var tempi = i;
+                    var tempj = j;
+                    var cou = 0;
+                    while(tempi > 0 && tempi < 6 && tempj > 0 && tempj < 6){
+                        tempi += di[k];
+                        tempj += dj[k];
+                        if(this.state.board[tempi][tempj] === this.state.player_red){
+                            cou++;
+                        }
+                        else{
+                            break;
+                        }
+                    }
+                    var tempi = i;
+                    var tempj = j;
+                    while(tempi > 0 && tempi < 6 && tempj > 0 && tempj < 6){
+                        tempi -= di[k];
+                        tempj -= dj[k];
+                        if(this.state.board[tempi][tempj] === this.state.player_red){
+                            cou++;
+                        }
+                        else{
+                            break;
+                        }
+                    }
+                    if(cou == 3){
+                        return 1;
+                    }
+                }
+                let ch = 0;
+                this.state.colcount.forEach(col => {ch+=col})
+                if(ch == 48) return 0;
+            }
+        }
+        ReactDOM.render(<App />, document.querySelector("#app"));
+    </script>
+</body>
+
+</html>

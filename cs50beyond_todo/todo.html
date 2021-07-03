@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Todo</title>
+</head>
+
+<body>
+    <div id="app" />
+    <script type="text/babel">
+
+        class App extends React.Component {
+
+            constructor(props) {
+                super(props);
+                this.state = {
+                    tasks: [],
+                    input: ""
+                }
+            }
+            render() {
+                return (
+                    <div>
+                        <h1 className="text-center">Tasks</h1>
+                        <hr/>
+                        {this.state.tasks.map((task, i) => {
+                            return (
+                            <div className="input-group m-3 mx-auto w-25" key={i}>
+                                <div className="input-group-prepend">
+                                    <div className="input-group-text">
+                                        <button value={i} className="btn btn-outline-secondary" onClick={this.delete}>X</button>
+                                    </div>
+                                </div>
+                                <p className="form-control">{task}</p>
+                            </div>
+                            )
+                        })}
+                        <div>
+                            <div className="input-group m-3 mx-auto w-50">
+                                <input type="text" onKeyPress={this.addTask1} onChange={this.handleChange} value={this.state.input} className="form-control" />
+                                <div className="input-group-prepend">
+                                    <button onClick={this.addTask} className="btn btn-primary">Add Task</button>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 className="text-center">Number of Tasks: {this.state.tasks.length}</h4>
+                    </div>
+                )
+            }
+
+            handleChange = (event) => {
+                this.setState({
+                    input: event.target.value
+                })
+            }
+
+            addTask = () => {
+                this.setState(state => ({
+                    tasks: [...state.tasks, state.input],
+                    input: ""
+                }))
+            }
+            addTask1 = (e) => {
+                if(e.key !== "Enter") return;
+                this.setState(state => ({
+                    tasks: [...state.tasks, state.input],
+                    input: ""
+                }))
+            }
+
+            delete = (event) => {
+                // let temp = this.state.tasks.filter((task,i) =>{
+                //     return i != event.target.value;
+                // });
+                const index = event.target.value;
+                this.setState(state => {
+                    const tasks = [...state.tasks];
+                    tasks.splice(index,1);
+                    return {
+                        tasks: tasks // or just tasks
+                    };
+                });
+            }
+        }
+        ReactDOM.render(<App />, document.querySelector("#app"));
+    </script>
+</body>
+
+</html>

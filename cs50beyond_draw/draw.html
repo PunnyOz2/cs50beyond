@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <style>
+            h1 {
+                text-align: center;
+                font-family: sans-serif;
+            }
+            input, select, button {
+                padding: 10px;
+                mix-blend-mode: exclusion;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Draw</title>
+    </head>
+    <body>
+        <h1>CS50 Beyond Draw</h1>
+        <button id="color_old">Previous</button>
+        <input type="color" value="#000000" id="color">
+        <select id="size" name="size">
+            <option disabled value="">Size</option>
+            <option selected value="2">2</option>
+            <option value="4">4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+            <option value="10">10</option>
+        </select>
+        <button id="clear">Clear</button>
+        <svg id="svg" style='width:100%; height:800px;'></svg>
+    </body>
+    <script>
+        const svg = d3.select('#svg');
+        let drawing = false;
+        let oldx = null;
+        let oldy = null;
+        const color = document.querySelector("#color");
+        const color_old = document.querySelector("#color_old");
+        const sizes = document.querySelector("#size");
+        const clear = document.querySelector("#clear");
+        let color_now = "#000000";
+        color.onchange = () => {
+            color_old.style.backgroundColor = color_now;
+            color_now = color.value;
+        }
+        color_old.onclick = () => {
+            //find color_old (translate rgb to 16bit)
+            let str = color_old.style.backgroundColor
+            var vals = str.substring(str.indexOf("(")+1, str.length - 1).split(", ");
+            let colortemp = "#";
+            vals.forEach(element => {
+                let hex = Number(element).toString(16);
+                if (hex.length < 2) {
+                    hex = "0" + hex;
+                }
+                colortemp += hex;
+            });
+
+            color_now = colortemp;
+            color_old.style.backgroundColor = color.value;
+            color.value = color_now;
+        }
+        let size = 2;
+        sizes.onchange = () =>{
+            size = sizes.value;
+        }
+        clear.onclick = () =>{
+            svg.selectAll("*").remove();
+        }
+        function draw_point(){
+            if (!drawing)return;
+            const coords = d3.mouse(this);
+
+            svg.append('circle')
+               .attr('cx', coords[0])
+               .attr('cy', coords[1])
+               .attr('r', size)
+               .style('fill', color_now)
+            
+            if(oldx!=null && oldy!=null){
+                svg.append('line')
+                   .attr('x1', oldx)
+                   .attr('y1', oldy)
+                   .attr('x2', coords[0])
+                   .attr('y2', coords[1])
+                   .style('stroke', color_now)
+                   .style('stroke-width', size*2)
+            }
+            oldx = coords[0]
+            oldy = coords[1]
+        }
+
+        svg.on('mousemove', draw_point);
+        svg.on('mousedown', ()=>{
+            drawing = true;
+        })
+        svg.on('mouseup', ()=>{
+            drawing = false;
+            oldx = null;
+            oldy = null;
+        })
+    </script>
+</html>
